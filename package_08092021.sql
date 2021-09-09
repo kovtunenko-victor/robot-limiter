@@ -10,6 +10,9 @@ CREATE OR REPLACE PACKAGE BODY ROBOT_LIMITER_UTILS is
 contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
 use_coefficient - применять коэффицент для баланса, по умолчанию выключен (0)
 seq - последоввательный номер "внешнего" баланса, по умолчанию первый ('1')
+
+если настройка по контракту не была найдена вызовет исключение:
+(ORA-20006: External balance configuration for contract [%contract_number] not found)
 */
 FUNCTION GET_EXTERNAL_BALANCE_ROBOT_LIMITER (contract_number in string, use_coefficient integer DEFAULT 0, seq in string DEFAULT '1') 
 RETURN number IS
@@ -29,8 +32,10 @@ BEGIN
   RETURN n_balance * n_coefficient;
 
 EXCEPTION
+  WHEN NO_DATA_FOUND THEN 
+    RAISE_APPLICATION_ERROR(-20006,'External balance configuration for contract [' || contract_number || '] not found');
   WHEN OTHERS THEN
-  RETURN -1;
+    RAISE_APPLICATION_ERROR(-20007,'Error when get external balance');
 
 END GET_EXTERNAL_BALANCE_ROBOT_LIMITER;
 
@@ -40,17 +45,17 @@ contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
 seq - последоввательный номер "внешнего" баланса, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20000: External balance configuration for contract [%contract_number] not found)
+(ORA-20006: External balance configuration for contract [%contract_number] not found)
 */
 PROCEDURE SET_EXTERNAL_BALANCE_ROBOT_LIMITER(external_balance number, contract_number in string, seq in string DEFAULT '1') is
-  process_id dtype.recordid %TYPE;
   is_exists number(18,0) := 0;
+  counter number;
 BEGIN
-  ows.sy_process.start_process('SET_EXTERNAL_BALANCE_ROBOT_LIMITER', '#external_balance = ' || external_balance ||
+  counter := ows.stnd.process_start('SET_EXTERNAL_BALANCE_ROBOT_LIMITER', '#external_balance = ' || external_balance ||
                                                                  ' #contract_number = ' || contract_number ||
                                                                  ' #seq = ' || seq,
-                            ows.sy_process.uninotunique, process_id);
-  ows.sy_process.process_message1(process_id, ows.sy_process.information, 'Strat set external balance');
+                            ows.sy_process.uninotunique);
+  ows.stnd.process_message(ows.sy_process.information, 'Strat set external balance');
   COMMIT;
   
   SELECT COUNT(1) INTO is_exists
@@ -73,24 +78,23 @@ BEGIN
   and hb.FILTER = contract_number 
   and hb.FILTER2 = seq;
   
-  ows.sy_process.process_message1(process_id, ows.sy_process.information, 'End set external balance');
+  ows.stnd.process_message(ows.sy_process.information, 'End set external balance');
   COMMIT;
   
-  sy_process.finish_process(process_id, stnd.yes);
+  ows.stnd.process_end();
   COMMIT;
   
 EXCEPTION
   WHEN NO_DATA_FOUND THEN 
-    ows.sy_process.process_message1(process_id, ows.sy_process.error, 'Error when set external balance. Balance configuration not found');
-    sy_process.finish_process(process_id, stnd.yes);
+    ows.stnd.process_message(ows.sy_process.error, 'External balance configuration for contract [' || contract_number || '] not found');
+    ows.stnd.process_reject();
     COMMIT;
-    
-    RAISE_APPLICATION_ERROR(-20000,'External balance configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20006,'External balance configuration for contract [' || contract_number || '] not found');
   WHEN OTHERS THEN
-  ows.sy_process.process_message1(process_id, ows.sy_process.error, 'Error when set external balance');
-  sy_process.finish_process(process_id, stnd.yes);
-  COMMIT;
-  
+    ows.stnd.process_message(ows.sy_process.error, 'Error when set external balance');
+    ows.stnd.process_reject();
+    COMMIT;
+    RAISE_APPLICATION_ERROR(-20007,'Error when set external balance');
 END SET_EXTERNAL_BALANCE_ROBOT_LIMITER;
 
 END ROBOT_LIMITER_UTILS;
