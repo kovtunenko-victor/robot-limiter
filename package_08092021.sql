@@ -6,22 +6,20 @@ END ROBOT_LIMITER_UTILS;
 
 CREATE OR REPLACE PACKAGE BODY ROBOT_LIMITER_UTILS is
 
-/* Функция для получения доступного "внешнего" баланса
+/* Функция для получения доступного "внешнего" сальдо
 contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
-use_coefficient - применять коэффицент для баланса, по умолчанию выключен (0)
-seq - последоввательный номер "внешнего" баланса, по умолчанию первый ('1')
+seq - последоввательный номер "внешнего" сальдо, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
 (ORA-20006: External balance configuration for contract [%contract_number] not found)
 */
-FUNCTION GET_EXTERNAL_BALANCE_ROBOT_LIMITER (contract_number in string, use_coefficient integer DEFAULT 0, seq in string DEFAULT '1') 
+FUNCTION GET_EXTERNAL_BALANCE_ROBOT_LIMITER (contract_number in string, seq in string DEFAULT '1') 
 RETURN number IS
 n_balance number(18,0) := 0;
-n_coefficient number(18,2) := 0;
 
 BEGIN
   SELECT
-    nvl(hb.ID_FILTER2, 0), nvl(decode(use_coefficient, 1, hb.INT_FILTER / 100, 1), 0) INTO n_balance, n_coefficient
+    nvl(hb.ID_FILTER2, 0) INTO n_balance
   FROM ows.sy_handbook hb
   WHERE
       hb.AMND_STATE = 'A'
@@ -29,7 +27,7 @@ BEGIN
   AND hb.FILTER = contract_number
   AND hb.filter2 = seq;
 
-  RETURN n_balance * n_coefficient;
+  RETURN n_balance;
 
 EXCEPTION
   WHEN NO_DATA_FOUND THEN 
@@ -39,10 +37,10 @@ EXCEPTION
 
 END GET_EXTERNAL_BALANCE_ROBOT_LIMITER;
 
-/*Процедура для установки доступного "внешнего" баланса
-external_balance - сумма внешнего баланса
+/*Процедура для установки доступного "внешнего" сальдо
+external_balance - сумма внешнего сальдо
 contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
-seq - последоввательный номер "внешнего" баланса, по умолчанию первый ('1')
+seq - последоввательный номер "внешнего" сальдо, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
 (ORA-20006: External balance configuration for contract [%contract_number] not found)
