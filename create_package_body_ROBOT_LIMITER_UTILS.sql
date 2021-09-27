@@ -442,9 +442,9 @@ contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
 seq - последоввательный номер "внешнего" сальдо, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20006: External balance configuration for contract [%contract_number] not found)
+(ORA-20100: External balance configuration for contract [%contract_number] not found)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when get external balance)
+(ORA-20200: Error when get external balance)
 */
 FUNCTION GET_EXTERNAL_BALANCE_ROBOT_LIMITER (contract_number in string, seq in string DEFAULT '1') 
 RETURN number IS
@@ -464,9 +464,9 @@ BEGIN
 
 EXCEPTION
   WHEN NO_DATA_FOUND THEN 
-    RAISE_APPLICATION_ERROR(-20006,'External balance configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20100,'External balance configuration for contract [' || contract_number || '] not found');
   WHEN OTHERS THEN
-    RAISE_APPLICATION_ERROR(-20007,'Error when get external balance');
+    RAISE_APPLICATION_ERROR(-20200,'Error when get external balance');
 
 END GET_EXTERNAL_BALANCE_ROBOT_LIMITER;
 
@@ -476,9 +476,9 @@ contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
 seq - последоввательный номер "внешнего" сальдо, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20006: External balance configuration for contract [%contract_number] not found)
+(ORA-20101: External balance configuration for contract [%contract_number] not found)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external balance)
+(ORA-20201: Error when set external balance)
 */
 PROCEDURE SET_EXTERNAL_BALANCE_ROBOT_LIMITER(external_balance number, contract_number in string, seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
@@ -517,12 +517,12 @@ EXCEPTION
     ows.stnd.process_message(ows.sy_process.error, 'External balance configuration for contract [' || contract_number || '] not found');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20006,'External balance configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20101,'External balance configuration for contract [' || contract_number || '] not found');
   WHEN OTHERS THEN
     ows.stnd.process_message(ows.sy_process.error, 'Error when set external balance');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20007,'Error when set external balance');
+    RAISE_APPLICATION_ERROR(-20201,'Error when set external balance');
 END SET_EXTERNAL_BALANCE_ROBOT_LIMITER;
 
 /*Процедура для установки текущего остатка и даты и времени его получения по "внешнему" счету организации
@@ -532,11 +532,11 @@ contract_number - номер контракта (связь с Custom Handbooks AUTH_LIM)
 seq - последоввательный номер "внешнего" счета организации, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20006: External balance configuration for contract [%contract_number] not found)
+(ORA-20102: External balance configuration for contract [%contract_number] not found)
 если передан last_operation_date равынй NULL будет вызвано исключение:
-(ORA-20008: last_operation_date is null)
+(ORA-20103: last_operation_date is null)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external account)
+(ORA-20202: Error when set external account)
 */
 PROCEDURE SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER(external_balance number, last_operation_date date, contract_number in string, seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
@@ -580,16 +580,16 @@ EXCEPTION
     ows.stnd.process_message(ows.sy_process.error, 'External account configuration for contract [' || contract_number || '] not found');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20006,'External account configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20102,'External account configuration for contract [' || contract_number || '] not found');
   WHEN ACCESS_INTO_NULL THEN 
     ows.stnd.process_message(ows.sy_process.error, 'last_operation_date is null');
     ows.stnd.process_reject();
-    RAISE_APPLICATION_ERROR(-20008,'last_operation_date is null');
+    RAISE_APPLICATION_ERROR(-20103,'last_operation_date is null');
   WHEN OTHERS THEN
     ows.stnd.process_message(ows.sy_process.error, 'Error when set external account');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20007,'Error when set external account');
+    RAISE_APPLICATION_ERROR(-20202,'Error when set external account');
 END SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER;
 
 /* Функция для получения сохраненного остатка "внешнему" счету организации
@@ -598,11 +598,11 @@ seq - последоввательный номер "внешнего" счета организации, по умолчанию первый 
 time_interval - индервал в минутах сколько сохраненный остаток сохраняет актуальность, по умолчанию 7200
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20006: External balance configuration for contract [%contract_number] not found)
+(ORA-20104: External balance configuration for contract [%contract_number] not found)
 если передан срок действия сохраненного остатка выйдет за указанный интервал time_interval будет вызвано исключение:
-(ORA-20008: Balance has expired)
+(ORA-20105: Balance has expired)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external account)
+(ORA-20203: Error when get external balance per date in history)
 */
 FUNCTION GET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER (contract_number in string, seq in string DEFAULT '1', time_interval in string DEFAULT '7200') 
 RETURN number IS
@@ -624,11 +624,11 @@ BEGIN
 
 EXCEPTION
   WHEN NO_DATA_FOUND THEN 
-    RAISE_APPLICATION_ERROR(-20006,'External account configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20104,'External account configuration for contract [' || contract_number || '] not found');
   WHEN ACCESS_INTO_NULL THEN 
-    RAISE_APPLICATION_ERROR(-20008,'Balance has expired');
+    RAISE_APPLICATION_ERROR(-20105,'Balance has expired');
   WHEN OTHERS THEN
-    RAISE_APPLICATION_ERROR(-20007,'Error when get external balance per date in history');
+    RAISE_APPLICATION_ERROR(-20203,'Error when get external balance per date in history');
 
 END GET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER;
 
@@ -640,11 +640,11 @@ account_type - тип номера счета который хотим получить из настройки. Возможные в
 seq - последоввательный номер "внешнего" счета организации, по умолчанию первый ('1')
 
 если настройка по контракту не была найдена вызовет исключение:
-(ORA-20006: External balance configuration for contract [%contract_number] not found)
+(ORA-20106: External balance configuration for contract [%contract_number] not found)
 если передан не существующий account_type будет вызвано исключение:
-(ORA-20008: account_type [%account_type] not found)
+(ORA-20107: account_type [%account_type] not found)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when get external account)
+(ORA-20204: Error when get external account)
 */
 FUNCTION GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER (contract_number in string, account_type in string DEFAULT 'MAIN', seq in string DEFAULT '1') 
 RETURN string IS
@@ -669,11 +669,11 @@ BEGIN
 
 EXCEPTION
   WHEN NO_DATA_FOUND THEN 
-    RAISE_APPLICATION_ERROR(-20006,'External account configuration for contract [' || contract_number || '] not found');
+    RAISE_APPLICATION_ERROR(-20106,'External account configuration for contract [' || contract_number || '] not found');
   WHEN ACCESS_INTO_NULL THEN 
-    RAISE_APPLICATION_ERROR(-20008,'account_type [' || account_type || '] not found');
+    RAISE_APPLICATION_ERROR(-20107,'account_type [' || account_type || '] not found');
   WHEN OTHERS THEN
-    RAISE_APPLICATION_ERROR(-20007,'Error when get external account');
+    RAISE_APPLICATION_ERROR(-20204,'Error when get external account');
 
 END GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER;
 
@@ -682,9 +682,9 @@ external_balance - значение "внешнего" сальдо
 external_balance_date - дата за которую передано "внешнее" сальдо
 
 если передан external_balance или external_balance_date равный NULL будет вызвано исключение:
-(ORA-20008: external_balance or external_balance_date is null)
+(ORA-20108: external_balance or external_balance_date is null)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external account)
+(ORA-20205: Error when save external balance per date in history)
 */
 PROCEDURE SAVE_EXTERNAL_BALANCE_PER_DATE(external_balance number, external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
@@ -719,12 +719,12 @@ EXCEPTION
   WHEN ACCESS_INTO_NULL THEN 
     ows.stnd.process_message(ows.sy_process.error, 'external_balance or external_balance_date is null');
     ows.stnd.process_reject();
-    RAISE_APPLICATION_ERROR(-20008,'external_balance or external_balance_date is null');
+    RAISE_APPLICATION_ERROR(-20108,'external_balance or external_balance_date is null');
   WHEN OTHERS THEN
     ows.stnd.process_message(ows.sy_process.error, 'Error when save external balance per date in historyt');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20007,'Error when save external balance per date in history');
+    RAISE_APPLICATION_ERROR(-20205,'Error when save external balance per date in history');
 END SAVE_EXTERNAL_BALANCE_PER_DATE;
 
 /*Процедура для сохранения информации о проведении проводок по файлу М для сохранённых значений 
@@ -732,11 +732,11 @@ END SAVE_EXTERNAL_BALANCE_PER_DATE;
 external_balance_date - дата за которую были проводки по файлу М
 
 если не найдена запись в таблице EXTERNAL_BALANCE_HISTORY с днем равным external_balance_date будет вызвано исключение:
-(ORA-20006: Day [%external_balance_date%] not found  in table proc.EXTERNAL_BALANCE_HISTORY)
+(ORA-20109: Day [%external_balance_date%] not found  in table proc.EXTERNAL_BALANCE_HISTORY)
 если передан external_balance_date равный NULL будет вызвано исключение:
-(ORA-20008: external_balance_date is null)
+(ORA-20110: external_balance_date is null)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external account)
+(ORA-20206: Error when approve external balance per date in history)
 */
 
 PROCEDURE APPROVE_EXTERNAL_BALANCE_PER_DATE(external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') is
@@ -768,27 +768,27 @@ EXCEPTION
     ows.stnd.process_message(ows.sy_process.error, 'Day [' || to_char(external_balance_date, 'dd.mm.yyyy') || '] not found  in table proc.EXTERNAL_BALANCE_HISTORY');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20006,'Day [' || to_char(external_balance_date, 'dd.mm.yyyy') || '] not found  in table proc.EXTERNAL_BALANCE_HISTORY');
+    RAISE_APPLICATION_ERROR(-20109,'Day [' || to_char(external_balance_date, 'dd.mm.yyyy') || '] not found  in table proc.EXTERNAL_BALANCE_HISTORY');
   WHEN ACCESS_INTO_NULL THEN 
     ows.stnd.process_message(ows.sy_process.error, 'external_balance_date is null');
     ows.stnd.process_reject();
-    RAISE_APPLICATION_ERROR(-20008,'external_balance_date is null');
+    RAISE_APPLICATION_ERROR(-20110,'external_balance_date is null');
   WHEN OTHERS THEN
     ows.stnd.process_message(ows.sy_process.error, 'Error when save external balance per date in historyt');
     ows.stnd.process_reject();
     COMMIT;
-    RAISE_APPLICATION_ERROR(-20007,'Error when approve external balance per date in history');
+    RAISE_APPLICATION_ERROR(-20206,'Error when approve external balance per date in history');
 END APPROVE_EXTERNAL_BALANCE_PER_DATE;
 
 /* Функция для получения сохранненных значений "внешнего" сальдо за оконченные дни, сумирует сальдо всех дат без подтверждения 
 external_balance_date - отправная дата за которую были проводки по файлу М
 
 если не найдена запись в таблице EXTERNAL_BALANCE_HISTORY с днем равным external_balance_date будет вызвано исключение:
-(ORA-20006: Day [%external_balance_date%] not found  in table proc.EXTERNAL_BALANCE_HISTORY)
+(ORA-20111: Day [%external_balance_date%] not found  in table proc.EXTERNAL_BALANCE_HISTORY)
 если передан external_balance_date равный NULL будет вызвано исключение:
-(ORA-20008: external_balance_date is null)
+(ORA-20112: external_balance_date is null)
 При возникновении любого другого исключения при выполнении будет вызвано исключение:
-(ORA-20007: Error when set external account)
+(ORA-20207: Error when get external balance per date in history)
 */
 FUNCTION GET_EXTERNAL_BALANCE_PER_DATE (external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') 
 RETURN number IS
@@ -828,18 +828,18 @@ BEGIN
 
 EXCEPTION
    WHEN NO_DATA_FOUND THEN 
-    RAISE_APPLICATION_ERROR(-20006,'Day [' || to_char(external_balance_date, 'dd.mm.yyyy') || '] not found  in table proc.EXTERNAL_BALANCE_HISTORY');
+    RAISE_APPLICATION_ERROR(-20111,'Day [' || to_char(external_balance_date, 'dd.mm.yyyy') || '] not found  in table proc.EXTERNAL_BALANCE_HISTORY');
   WHEN ACCESS_INTO_NULL THEN 
-    RAISE_APPLICATION_ERROR(-20008,'external_balance_date is null');
+    RAISE_APPLICATION_ERROR(-20112,'external_balance_date is null');
   WHEN OTHERS THEN
-    RAISE_APPLICATION_ERROR(-20007,'Error when get external balance per date in history');
+    RAISE_APPLICATION_ERROR(-20207,'Error when get external balance per date in history');
 
 END GET_EXTERNAL_BALANCE_PER_DATE;
 
 /* Функция для расчета лимита авторизации клиенту
 contract_number - контракт по которому проводим расчет
 */
-FUNCTION CALCULATE_AUTHORIZATION_LIMIT(contract_number in string) RETURN number is 
+PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_account out number) is 
   counter number;
   temp number;
   
@@ -854,7 +854,7 @@ FUNCTION CALCULATE_AUTHORIZATION_LIMIT(contract_number in string) RETURN number 
   c_mir_account varchar2(25);
   c_mir_account_oppo varchar2(25);
   
-  n_amount_on_account number(18,2);
+  n_amount_on_account_local number(18,2);
   n_limit number(18,2);
   n_limit_bfko number(18,2) := 0;
   n_entry_count number(18,0);
@@ -890,15 +890,15 @@ BEGIN
   COMMIT;
   
   ows.stnd.process_message(ows.sy_process.information, 'Get organization account balance');
-  n_amount_on_account := PROC.ACQINFO_Q.GET_BALANCE(PROC.ROBOT_LIMITER_UTILS.GET_ACCOUNT(c_org_account), PROC.ROBOT_LIMITER_UTILS.GET_BIC(c_org_account));
-  ows.stnd.process_message(ows.sy_process.information, 'Loaded balance from CFT = [' || n_amount_on_account || ']');
-  IF (n_amount_on_account IS NOT NULL) THEN
-    PROC.ROBOT_LIMITER_UTILS.SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER(n_amount_on_account, sysdate, contract_number, 'ORG');
+  n_amount_on_account_local := PROC.ACQINFO_Q.GET_BALANCE(PROC.ROBOT_LIMITER_UTILS.GET_ACCOUNT(c_org_account), PROC.ROBOT_LIMITER_UTILS.GET_BIC(c_org_account));
+  ows.stnd.process_message(ows.sy_process.information, 'Loaded balance from CFT = [' || n_amount_on_account_local || ']');
+  IF (n_amount_on_account_local IS NOT NULL) THEN
+    PROC.ROBOT_LIMITER_UTILS.SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER(n_amount_on_account_local, sysdate, contract_number, 'ORG');
     ows.stnd.process_message(ows.sy_process.information, 'Balance saved in account property');
   ELSE 
     ows.stnd.process_message(ows.sy_process.information, 'Satrt get balance from account property');
-    n_amount_on_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER('test_contract', 'ORG');
-	ows.stnd.process_message(ows.sy_process.information, 'Loaded balance from account property = [' || n_amount_on_account || ']');
+    n_amount_on_account_local := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER(contract_number, 'ORG');
+	ows.stnd.process_message(ows.sy_process.information, 'Loaded balance from account property = [' || n_amount_on_account_local || ']');
   END IF;
   COMMIT;
   
@@ -940,15 +940,15 @@ BEGIN
 	  PROC.ROBOT_LIMITER_UTILS.APPROVE_EXTERNAL_BALANCE_PER_DATE(to_date(sysdate-1));
     END IF;
 	
-	n_limit := n_amount_on_account + n_balance_now;
+	n_limit := n_amount_on_account_local + n_balance_now;
   ELSE
     ows.stnd.process_message(ows.sy_process.information, 'Turnover by accounts in now date is not exists');
 	COMMIT;
 	
     n_balance_per_period := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_BALANCE_PER_DATE(sysdate);
 	ows.stnd.process_message(ows.sy_process.information, 'Loaded balance per period is [' || n_balance_per_period || ']');
-	n_amount_on_account := n_amount_on_account + n_balance_per_period;
-    n_limit := n_amount_on_account + n_balance_now;
+	n_amount_on_account_local := n_amount_on_account_local + n_balance_per_period;
+    n_limit := n_amount_on_account_local + n_balance_now;
   END IF;
 
   ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for add to limit BFKO is [' || n_limit || ']');
@@ -959,13 +959,13 @@ BEGIN
   ows.stnd.process_message(ows.sy_process.information, 'Now limit for client in BFKO without "calculate auth limit" is [' || n_limit_bfko || ']');
   COMMIT;
   
-  n_amount_on_account := n_amount_on_account + n_limit_bfko;
+  n_amount_on_account_local := n_amount_on_account_local + n_limit_bfko;
   
-  ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for BPC is [' || n_amount_on_account || ']');
+  ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for BPC is [' || n_amount_on_account_local || ']');
   ows.stnd.process_end();
   COMMIT;
   
-  return n_amount_on_account;
+  n_amount_on_account := n_amount_on_account_local;
   
 END CALCULATE_AUTHORIZATION_LIMIT;
 

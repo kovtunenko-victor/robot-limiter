@@ -12,5 +12,5 @@ CREATE OR REPLACE PACKAGE ROBOT_LIMITER_UTILS AS
   PROCEDURE APPROVE_EXTERNAL_BALANCE_PER_DATE (external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1');
   FUNCTION GET_EXTERNAL_BALANCE_PER_DATE (external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') RETURN number;
   
-  FUNCTION CALCULATE_AUTHORIZATION_LIMIT(contract_number in string) RETURN number;
+  PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_account out number);
 END ROBOT_LIMITER_UTILS;
