@@ -1,7 +1,6 @@
 CREATE OR REPLACE PACKAGE ROBOT_LIMITER_UTILS AS
   FUNCTION GET_BIC(p_account in string) RETURN string;
   FUNCTION GET_ACCOUNT(p_account in string) return string;
-  FUNCTION GET_USG(p_ac in string) return number;
   
   FUNCTION GET_EXTERNAL_BALANCE_ROBOT_LIMITER (contract_number in string, seq in string DEFAULT '1') RETURN number;
   PROCEDURE SET_EXTERNAL_BALANCE_ROBOT_LIMITER(external_balance number, contract_number in string, seq in string DEFAULT '1');
