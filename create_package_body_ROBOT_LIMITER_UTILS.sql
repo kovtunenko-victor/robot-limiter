@@ -386,10 +386,19 @@ n_balance NUMBER(18,2) := 0;
 n_first_row number := 1;
 d_balance_date_start date;
 d_balance_date_end date;
+is_exists number(18,0) := 0;
 
 BEGIN
   IF (external_balance_date is null) THEN 
     raise ACCESS_INTO_NULL;
+  END IF;
+  
+  SELECT COUNT(1) INTO is_exists 
+  FROM EXTERNAL_BALANCE_HISTORY 
+  WHERE BALANCE_DATE = (to_date(external_balance_date));
+  
+  IF (is_exists = 0) THEN 
+    raise NO_DATA_FOUND;
   END IF;
   
   FOR item in (SELECT ID, AMND_DATE, BALANCE_DATE, BALANCE, ENTRY_EXISISTS 
@@ -535,7 +544,7 @@ BEGIN
     ows.stnd.process_message(ows.sy_process.information, 'Turnover by accounts in now date is not exists');
 	COMMIT;
 	
-    n_balance_per_period := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_BALANCE_PER_DATE(sysdate);
+    n_balance_per_period := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_BALANCE_PER_DATE(sysdate-1);
 	ows.stnd.process_message(ows.sy_process.information, 'Loaded balance per period is [' || n_balance_per_period || ']');
 	n_amount_on_account_local := n_amount_on_account_local + n_balance_per_period;
     n_limit := n_amount_on_account_local + n_balance_now;
@@ -556,7 +565,13 @@ BEGIN
   COMMIT;
   
   n_amount_on_account := n_amount_on_account_local;
-  
+
+  EXCEPTION
+    WHEN OTHERS THEN
+    ows.stnd.process_message(ows.sy_process.error, sqlerrm);
+    ows.stnd.process_reject();
+    COMMIT;
+
 END CALCULATE_AUTHORIZATION_LIMIT;
 
 END ROBOT_LIMITER_UTILS;
