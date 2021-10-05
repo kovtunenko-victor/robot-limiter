@@ -73,9 +73,8 @@ seq - последоввательный номер "внешнего" сальдо, по умолчанию первый ('1')
 PROCEDURE SET_EXTERNAL_BALANCE_ROBOT_LIMITER(external_balance number, contract_number in string, seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
 BEGIN
-  ows.stnd.process_message(ows.sy_process.information, 'SET_EXTERNAL_BALANCE_ROBOT_LIMITER #external_balance = ' || external_balance ||
-                                                                 ' #contract_number = ' || contract_number ||
-                                                                 ' #seq = ' || seq);						
+  ows.stnd.process_message(ows.sy_process.information, 'SET_EXTERNAL_BALANCE_ROBOT_LIMITER');
+  ows.stnd.process_message(ows.sy_process.information, 'external_balance=' || external_balance ||';contract_number=' || contract_number ||';seq=' || seq || ';');						
   ows.stnd.process_message(ows.sy_process.information, 'Strat set external balance');
   COMMIT;
   
@@ -131,10 +130,8 @@ seq - последоввательный номер "внешнего" счета организации, по умолчанию первый 
 PROCEDURE SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER(external_balance number, last_operation_date date, contract_number in string, seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
 BEGIN
-  ows.stnd.process_message(ows.sy_process.information, 'SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER #external_balance = ' || external_balance ||
-                                                                 ' #last_operation_date = ' || to_char(last_operation_date) ||
-                                                                 ' #contract_number = ' || contract_number ||
-                                                                 ' #seq = ' || seq); 
+  ows.stnd.process_message(ows.sy_process.information, 'SET_EXTERNAL_ACCOUNT_BALANCE_ROBOT_LIMITER'); 
+  ows.stnd.process_message(ows.sy_process.information, 'external_balance=' || external_balance ||';last_operation_date=' || to_char(last_operation_date) || ';contract_number=' || contract_number || ';seq=' || seq || ';');
   ows.stnd.process_message(ows.sy_process.information, 'Strat set external account balance');
   COMMIT;
   
@@ -279,8 +276,8 @@ external_balance_date - дата за которую передано "внешнее" сальдо
 PROCEDURE SAVE_EXTERNAL_BALANCE_PER_DATE(external_balance number, external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
 BEGIN
-  ows.stnd.process_message(ows.sy_process.information, 'SAVE_EXTERNAL_BALANCE_PER_DATE #external_balance = ' || external_balance ||
-                                                                 ' #external_balance_date = ' || to_char(external_balance_date));						   
+  ows.stnd.process_message(ows.sy_process.information, 'SAVE_EXTERNAL_BALANCE_PER_DATE');
+  ows.stnd.process_message(ows.sy_process.information, 'external_balance=' || external_balance || ';external_balance_date=' || to_char(external_balance_date) || ';contract_number='|| contract_number ||';seq='|| seq ||';');						   
   ows.stnd.process_message(ows.sy_process.information, 'Strat save external balance per date in history');
   COMMIT;
   
@@ -332,7 +329,8 @@ external_balance_date - дата за которую были проводки по файлу М
 PROCEDURE APPROVE_EXTERNAL_BALANCE_PER_DATE(external_balance_date date, contract_number in string DEFAULT '-', seq in string DEFAULT '1') is
   is_exists number(18,0) := 0;
 BEGIN
-  ows.stnd.process_message(ows.sy_process.information, 'APPROVE_EXTERNAL_BALANCE_PER_DATE #external_balance_date = ' || to_char(external_balance_date));
+  ows.stnd.process_message(ows.sy_process.information, 'APPROVE_EXTERNAL_BALANCE_PER_DATE');
+  ows.stnd.process_message(ows.sy_process.information, 'external_balance_date=' || to_char(external_balance_date, 'dd-mm-yyyy') || ';contract_number='|| contract_number ||';seq='|| seq ||';');
   ows.stnd.process_message(ows.sy_process.information, 'Strat approve external balance per date in history');
   COMMIT;
   
@@ -464,10 +462,11 @@ PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_a
   
   
 BEGIN
-  counter := ows.stnd.process_start('CALCULATE_AUTHORIZATION_LIMIT', '#contract_number = ' || contract_number, ows.sy_process.uninotunique);
+  counter := ows.stnd.process_start('CALCULATE_AUTHORIZATION_LIMIT', 'contract_number=' || contract_number ';', ows.sy_process.uninotunique);
+  ows.stnd.process_message(ows.sy_process.information, 'CALCULATE_AUTHORIZATION_LIMIT');
+  ows.stnd.process_message(ows.sy_process.information, 'contract_number=' || contract_number ';');
   ows.stnd.process_message(ows.sy_process.information, 'Strat calculate auth limit');
   COMMIT;
-  
   ows.stnd.process_message(ows.sy_process.information, 'Get accounts numbers');
   c_org_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'ORG');
   ows.stnd.process_message(ows.sy_process.information, 'Organization account is [' || c_org_account || ']');
