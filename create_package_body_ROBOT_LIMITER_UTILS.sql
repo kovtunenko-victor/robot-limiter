@@ -462,9 +462,9 @@ PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_a
   
   
 BEGIN
-  counter := ows.stnd.process_start('CALCULATE_AUTHORIZATION_LIMIT', 'contract_number=' || contract_number ';', ows.sy_process.uninotunique);
+  counter := ows.stnd.process_start('CALCULATE_AUTHORIZATION_LIMIT', 'contract_number=' || contract_number || ';', ows.sy_process.uninotunique);
   ows.stnd.process_message(ows.sy_process.information, 'CALCULATE_AUTHORIZATION_LIMIT');
-  ows.stnd.process_message(ows.sy_process.information, 'contract_number=' || contract_number ';');
+  ows.stnd.process_message(ows.sy_process.information, 'contract_number=' || contract_number || ';');
   ows.stnd.process_message(ows.sy_process.information, 'Strat calculate auth limit');
   COMMIT;
   ows.stnd.process_message(ows.sy_process.information, 'Get accounts numbers');
@@ -560,6 +560,7 @@ BEGIN
   n_amount_on_account_local := n_amount_on_account_local + n_limit_bfko;
   
   ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for BPC is [' || n_amount_on_account_local || ']');
+  ows.stnd.process_message(ows.sy_process.information, 'bpc_limit=' || n_amount_on_account_local || ';add_to_bfko_limit=' || n_limit || ';now_bfko_limit=' || n_limit_bfko || ';bfko_limit=' || n_limit+n_limit_bfko || ';');
   ows.stnd.process_end();
   COMMIT;
   
