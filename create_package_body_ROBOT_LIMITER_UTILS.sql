@@ -277,7 +277,7 @@ PROCEDURE SAVE_EXTERNAL_BALANCE_PER_DATE(external_balance number, external_balan
   is_exists number(18,0) := 0;
 BEGIN
   ows.stnd.process_message(ows.sy_process.information, 'SAVE_EXTERNAL_BALANCE_PER_DATE');
-  ows.stnd.process_message(ows.sy_process.information, 'external_balance=' || external_balance || ';external_balance_date=' || to_char(external_balance_date) || ';contract_number='|| contract_number ||';seq='|| seq ||';');						   
+  ows.stnd.process_message(ows.sy_process.information, 'external_balance_per_date=' || external_balance || ';external_balance_date_per_date=' || to_char(external_balance_date) || ';contract_number='|| contract_number ||';seq='|| seq ||';');						   
   ows.stnd.process_message(ows.sy_process.information, 'Strat save external balance per date in history');
   COMMIT;
   
@@ -551,16 +551,16 @@ BEGIN
 
   ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for add to limit BFKO is [' || n_limit || ']');
   COMMIT;
-  PROC.ROBOT_LIMITER_UTILS.SET_EXTERNAL_BALANCE_ROBOT_LIMITER(n_limit, contract_number, 'LIMIT');
+  --PROC.ROBOT_LIMITER_UTILS.SET_EXTERNAL_BALANCE_ROBOT_LIMITER(n_limit, contract_number, 'LIMIT');
   
   n_limit_bfko := PROC.ACQINFO_Q.GET_USG(contract_number);
   ows.stnd.process_message(ows.sy_process.information, 'Now limit for client in BFKO without "calculate auth limit" is [' || n_limit_bfko || ']');
   COMMIT;
-  
+
   n_amount_on_account_local := n_amount_on_account_local + n_limit_bfko;
   
   ows.stnd.process_message(ows.sy_process.information, 'End calculate auth limit. Limit for BPC is [' || n_amount_on_account_local || ']');
-  ows.stnd.process_message(ows.sy_process.information, 'bpc_limit=' || n_amount_on_account_local || ';add_to_bfko_limit=' || n_limit || ';now_bfko_limit=' || n_limit_bfko || ';bfko_limit=' || n_limit+n_limit_bfko || ';');
+  ows.stnd.process_message(ows.sy_process.information, 'bpc_limit=' || to_char(n_amount_on_account_local) || ';add_to_bfko_limit=' || to_char(n_limit) || ';now_bfko_limit=' || to_char(n_limit_bfko) || ';bfko_limit=' || to_char(n_limit+n_limit_bfko) || ';');
   ows.stnd.process_end();
   COMMIT;
   
@@ -576,4 +576,4 @@ END CALCULATE_AUTHORIZATION_LIMIT;
 
 END ROBOT_LIMITER_UTILS;
 
-grant EXECUTE, DEBUG on "PROC"."ROBOT_LIMITER_UTILS" to "OWS" ;
+--grant EXECUTE, DEBUG on "PROC"."ROBOT_LIMITER_UTILS" to "OWS" ;
