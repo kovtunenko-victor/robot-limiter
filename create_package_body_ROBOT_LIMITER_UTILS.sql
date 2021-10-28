@@ -454,23 +454,13 @@ c_mir_account_oppo varchar2(25);
 
 BEGIN
   c_visa_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'VISA');
-  ows.stnd.process_message(ows.sy_process.information, 'Visa account is [' || c_visa_account || ']');
   c_visa_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'VISA');
-  ows.stnd.process_message(ows.sy_process.information, 'Visa opposite account is [' || c_visa_account_oppo || ']');
   
   c_mc_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'MC');
-  ows.stnd.process_message(ows.sy_process.information, 'MasterCard account is [' || c_mc_account || ']');
   c_mc_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'MC');
-  ows.stnd.process_message(ows.sy_process.information, 'MasterCard opposite account is [' || c_mc_account_oppo || ']');
   
   c_mir_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'MIR');
-  ows.stnd.process_message(ows.sy_process.information, 'Mir account is [' || c_mir_account || ']');
   c_mir_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'MIR');
-  ows.stnd.process_message(ows.sy_process.information, 'Mir opposite account is [' || c_mir_account_oppo || ']');
-  COMMIT;
-  
-  ows.stnd.process_message(ows.sy_process.information, 'Get turnover by accounts in now date');
-  COMMIT;
 
   temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_visa_account, to_date(for_date));
   temp := PROC.ACQINFO_Q.GETDOCS(c_visa_account, c_org_account, to_date(for_date));
@@ -486,16 +476,10 @@ BEGIN
   temp := PROC.ACQINFO_Q.GETDOCS(c_mir_account, c_org_account, to_date(for_date));
   temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_mir_account_oppo, to_date(for_date));
   temp := PROC.ACQINFO_Q.GETDOCS(c_mir_account_oppo, c_org_account, to_date(for_date)); 
-
-  ows.stnd.process_message(ows.sy_process.information, 'Check turnover by accounts in now date');
-  COMMIT;
   
   SELECT COUNT(1) into n_entry_count 
   FROM PROC.ACQINFO_DOC d 
   WHERE (d.ACCOUNT_DT = c_org_account or d.ACCOUNT_KT = c_org_account) and d.LOCAL_DATE = to_date(for_date);
-  
-  ows.stnd.process_message(ows.sy_process.information, 'Finded [' || n_entry_count || '] entries for date [' || to_char(for_date, 'dd.mm.yyyy') || ']');
-  COMMIT;
 
   return n_entry_count;
 
