@@ -509,15 +509,7 @@ PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_a
   temp number;
   
   c_org_account varchar2(25);
-  
-  c_visa_account varchar2(25);
-  c_visa_account_oppo varchar2(25);
-  
-  c_mc_account varchar2(25);
-  c_mc_account_oppo varchar2(25);
-  
-  c_mir_account varchar2(25);
-  c_mir_account_oppo varchar2(25);
+  c_entry_status varchar2(2);
   
   n_amount_on_account_local number(18,2);
   n_limit number(18,2);
@@ -527,8 +519,7 @@ PROCEDURE CALCULATE_AUTHORIZATION_LIMIT(contract_number in string, n_amount_on_a
   n_balance_now number(18,2);
   
   b_entrys_exists boolean := false;
-  
-  
+
 BEGIN
   counter := ows.stnd.process_start('CALCULATE_AUTHORIZATION_LIMIT', 'contract_number=' || contract_number || ';', ows.sy_process.uninotunique);
   ows.stnd.process_message(ows.sy_process.information, 'CALCULATE_AUTHORIZATION_LIMIT');
@@ -538,23 +529,7 @@ BEGIN
   ows.stnd.process_message(ows.sy_process.information, 'Get accounts numbers');
   c_org_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'ORG');
   ows.stnd.process_message(ows.sy_process.information, 'Organization account is [' || c_org_account || ']');
-  
-  c_visa_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'VISA');
-  ows.stnd.process_message(ows.sy_process.information, 'Visa account is [' || c_visa_account || ']');
-  c_visa_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'VISA');
-  ows.stnd.process_message(ows.sy_process.information, 'Visa opposite account is [' || c_visa_account_oppo || ']');
-  
-  c_mc_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'MC');
-  ows.stnd.process_message(ows.sy_process.information, 'MasterCard account is [' || c_mc_account || ']');
-  c_mc_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'MC');
-  ows.stnd.process_message(ows.sy_process.information, 'MasterCard opposite account is [' || c_mc_account_oppo || ']');
-  
-  c_mir_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'MIR');
-  ows.stnd.process_message(ows.sy_process.information, 'Mir account is [' || c_mir_account || ']');
-  c_mir_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'MIR');
-  ows.stnd.process_message(ows.sy_process.information, 'Mir opposite account is [' || c_mir_account_oppo || ']');
-  COMMIT;
-  
+
   ows.stnd.process_message(ows.sy_process.information, 'Get organization account balance');
   n_amount_on_account_local := PROC.ACQINFO_Q.GET_BALANCE(PROC.ROBOT_LIMITER_UTILS.GET_ACCOUNT(c_org_account), PROC.ROBOT_LIMITER_UTILS.GET_BIC(c_org_account));
   ows.stnd.process_message(ows.sy_process.information, 'Loaded balance from CFT = [' || n_amount_on_account_local || ']');
@@ -571,31 +546,28 @@ BEGIN
   ows.stnd.process_message(ows.sy_process.information, 'Get balance in now date');
   n_balance_now := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_BALANCE_ROBOT_LIMITER(contract_number, 'BALANCE');
   ows.stnd.process_message(ows.sy_process.information, 'Balance in now date is [' || n_balance_now || ']');
-  
-  ows.stnd.process_message(ows.sy_process.information, 'Get turnover by accounts in now date');
-  COMMIT;
-  
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_visa_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_visa_account, c_org_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_visa_account_oppo, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_visa_account_oppo, c_org_account, to_date(sysdate));
-    
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_mc_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_mc_account, c_org_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_mc_account_oppo, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_mc_account_oppo, c_org_account, to_date(sysdate));
-    
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_mir_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_mir_account, c_org_account, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_org_account, c_mir_account_oppo, to_date(sysdate));
-  temp := PROC.ACQINFO_Q.GETDOCS(c_mir_account_oppo, c_org_account, to_date(sysdate)); 
 
-  ows.stnd.process_message(ows.sy_process.information, 'Check turnover by accounts in now date');
-  COMMIT;
+  SELECT nvl(min(ENTRY_EXISISTS), 'N') INTO c_entry_status 
+  FROM EXTERNAL_BALANCE_HISTORY 
+  WHERE BALANCE_DATE = to_date(sysdate-2);
   
-  SELECT COUNT(1) into n_entry_count 
-  FROM PROC.ACQINFO_DOC d 
-  WHERE (d.ACCOUNT_DT = c_org_account or d.ACCOUNT_KT = c_org_account) and d.LOCAL_DATE = to_date(sysdate);
+  IF c_entry_status = 'N' THEN
+    ows.stnd.process_message(ows.sy_process.information, 'Balance for date [' || to_char(sysdate-1, 'dd.mm.yyyy') || '] is not approved');
+    COMMIT;
+    
+    n_entry_count := ROBOT_LIMITER_UTILS.GET_ENTRY_COUNT(contract_number, sysdate-1, c_org_account);
+    
+    IF(n_entry_count > 0) THEN
+      ows.stnd.process_message(ows.sy_process.information, 'Turnover by accounts in now [' || to_char(sysdate-1, 'dd.mm.yyyy') || '] is exists');
+	  COMMIT;
+      
+      --ows.stnd.process_message(ows.sy_process.information, 'Approve balance per [' || to_char(sysdate-2, 'dd.mm.yyyy') || '] date');
+	  --PROC.ROBOT_LIMITER_UTILS.APPROVE_EXTERNAL_BALANCE_PER_DATE(to_date(sysdate-2));
+    END IF;
+    
+  END IF;
+  
+  n_entry_count := ROBOT_LIMITER_UTILS.GET_ENTRY_COUNT(contract_number, sysdate, c_org_account);
 
   IF(n_entry_count > 0) THEN
     ows.stnd.process_message(ows.sy_process.information, 'Turnover by accounts in now date is exists');
