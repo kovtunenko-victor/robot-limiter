@@ -434,10 +434,11 @@ EXCEPTION
 END GET_EXTERNAL_BALANCE_PER_DATE;
 
 /* Функция для получния информации из ЦФТ об оборотах по расчету за день
+contract_number - контракт по которому проводим расчет
 for_date - отправная дата за которую смотрим обороты
 c_org_account - счет организации по которому смотрим обороты
 */
-FUNCTION GET_ENTRY_COUNT (for_date in date, c_org_account in string) 
+FUNCTION GET_ENTRY_COUNT (contract_number in string, for_date in date, c_org_account in string) 
 RETURN number IS
 n_entry_count number := 0;
 temp number;
