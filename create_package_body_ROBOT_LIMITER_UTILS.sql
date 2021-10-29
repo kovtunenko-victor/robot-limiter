@@ -453,6 +453,10 @@ c_mir_account varchar2(25);
 c_mir_account_oppo varchar2(25);
 
 BEGIN
+  ows.stnd.process_message(ows.sy_process.information, 'GET_ENTRY_COUNT');
+  ows.stnd.process_message(ows.sy_process.information, 'contract_number=' || contract_number || ';for_date='|| to_char(for_date, 'dd-mm-yyyy') ||';c_org_account='|| c_org_account ||';');
+  COMMIT;
+
   c_visa_account := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'MAIN', 'VISA');
   ows.stnd.process_message(ows.sy_process.information, 'Visa account is [' || c_visa_account || ']');
   c_visa_account_oppo := PROC.ROBOT_LIMITER_UTILS.GET_EXTERNAL_ACCOUNT_ROBOT_LIMITER(contract_number, 'OPPOSITE', 'VISA');
